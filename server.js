@@ -5,6 +5,10 @@ import cors from "cors";
 import mongoose from "mongoose";
 import Mailjet from "node-mailjet";
 
+// Import Mongo DB Schema / Model
+import Reservation from "./reservationModel.js";
+import Contact from "./contactModel.js";
+
 const mailjet = Mailjet.apiConnect(
 	process.env.MAILJET_API_PUBLIC_KEY,
 	process.env.MAILJET_API_PRIVATE_KEY
@@ -30,9 +34,9 @@ mongoose
 
 app.post("/contact", async (req, res) => {
 	try {
-		const { name, email } = req.body;
+		const { name, email, message } = req.body;
 
-		// Send email to the customer
+		// Cliemt email format
 		const request = mailjet.post("send", { version: "v3.1" }).request({
 			Messages: [
 				{
@@ -81,7 +85,83 @@ app.post("/contact", async (req, res) => {
 			],
 		});
 
+		// Admin email format
+		const requestAdmin = mailjet.post("send", { version: "v3.1" }).request({
+			Messages: [
+				{
+					From: {
+						Email: "thetommedia@gmail.com",
+						Name: "Kojo Gardens",
+					},
+					To: [
+						{
+							Email: `tomiwaadelae6@gmail.com`,
+							Name: `Henry Kojo`,
+						},
+					],
+					Subject: "New Contact Form Submission - Kojo Gardens",
+					TextPart: `New Contact Form Submission - Kojo Gardens`,
+					HTMLPart: `<div 
+                                    style="
+                                        font-family: __Oldenburg_709b3f, __Oldenburg_Fallback_709b3f;
+                                        font-size: 15px;
+                                        color: #3e363f;
+                                    "
+                                >
+                                    <p style="color: #5cb074;">Dear Henry Kojo,</p>
+                                    <p>
+                                        Exciting news! A new contact form submission has been successfully received via our website.
+                                    </p>
+                                    <p>
+                                        The details are as follows:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            Name of Sender: ${name}
+                                        </li>
+                                        <li>
+                                            Email Address: ${email}
+                                        </li>
+                                        <li>
+                                            Special Requests: ${message}
+                                        </li>
+                                    </ul>
+                                    <p>
+                                        Thank you for your attention to this matter. Your commitment to guest satisfaction is truly appreciated
+                                    </p>
+                                    <p>
+                                        Best regards,
+                                    </p>
+                                    <p>Henry Kojo</p>
+                                    <p>CEO & Founder of Kojo Gardens</p>
+                                    <p>Kojo Gardens</p>
+                                    <p>07038803037, 08027836001</p>
+                                </div>
+                        `,
+				},
+			],
+		});
+
+		// Save reservation details to database
+		const contact = new Contact({
+			name,
+			email,
+			message,
+		});
+
+		await contact.save();
+
+		// Send email to client
 		request
+			.then(() => {
+				res.status(201).json({ msg: "Email sent successfully!" });
+			})
+			.catch((err) => {
+				return err;
+			});
+
+		// Send email to admin
+		requestAdmin
 			.then(() => {
 				res.status(201).json({ msg: "Email sent successfully!" });
 			})
@@ -96,6 +176,8 @@ app.post("/contact", async (req, res) => {
 app.post("/reservations", async (req, res) => {
 	try {
 		const { name, email, arrival, departure, guest, message } = req.body;
+
+		// Client email format
 		const request = mailjet.post("send", { version: "v3.1" }).request({
 			Messages: [
 				{
@@ -161,7 +243,95 @@ app.post("/reservations", async (req, res) => {
 			],
 		});
 
+		// Admin email format
+		const requestAdmin = mailjet.post("send", { version: "v3.1" }).request({
+			Messages: [
+				{
+					From: {
+						Email: "thetommedia@gmail.com",
+						Name: "Kojo Gardens",
+					},
+					To: [
+						{
+							Email: `tomiwaadelae6@gmail.com`,
+							Name: `Henry Kojo`,
+						},
+					],
+					Subject: "New Inquiry Received - Kojo Gardens",
+					TextPart: `New Inquiry Received - Kojo Gardens`,
+					HTMLPart: `<div 
+                                    style="
+                                        font-family: __Oldenburg_709b3f, __Oldenburg_Fallback_709b3f;
+                                        font-size: 15px;
+                                        color: #3e363f;
+                                    "
+                                >
+                                    <p style="color: #5cb074;">Dear Henry Kojo,</p>
+                                    <p>
+                                        Great news! A new inquiry has been successfully received through our website at Kojo Gardens.
+                                    </p>
+                                    <p>
+                                        The details are as follows:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            Name of Sender: ${name}
+                                        </li>
+                                        <li>
+                                            Email Address: ${email}
+                                        </li>
+                                        <li>
+                                            Arrival Date: ${arrival}
+                                        </li>
+                                        <li>
+                                            Departure Date: ${departure}
+                                        </li>
+                                        <li>
+                                            Number of Guests: ${guest}
+                                        </li>
+                                        <li>
+                                            Special Requests: ${message}
+                                        </li>
+                                    </ul>
+                                    <p>
+                                        Thank you for your attention to this matter. Your commitment to guest satisfaction is truly appreciated
+                                    </p>
+                                    <p>
+                                        Best regards,
+                                    </p>
+                                    <p>Henry Kojo</p>
+                                    <p>CEO & Founder of Kojo Gardens</p>
+                                    <p>Kojo Gardens</p>
+                                    <p>07038803037, 08027836001</p>
+                                </div>
+                        `,
+				},
+			],
+		});
+
+		// Save reservation details to database
+		const reservation = new Reservation({
+			name,
+			email,
+			guest,
+			arrivalDate: arrival,
+			departureDate: departure,
+			message,
+		});
+
+		await reservation.save();
+
+		// Send email to client
 		request
+			.then(() => {
+				res.status(201).json({ msg: "Email sent successfully!" });
+			})
+			.catch((err) => {
+				return err;
+			});
+
+		// Send email to admin
+		requestAdmin
 			.then(() => {
 				res.status(201).json({ msg: "Email sent successfully!" });
 			})
