@@ -175,7 +175,7 @@ app.post("/contact", async (req, res) => {
 				return err;
 			});
 	} catch (err) {
-		res.status(409).json({ msg: "An error occured!" });
+		res.status(409).json({ msg: "An error occured!", err });
 	}
 });
 
