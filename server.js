@@ -162,7 +162,8 @@ app.post("/contact", async (req, res) => {
 				res.status(201).json({ msg: "Email sent successfully!" });
 			})
 			.catch((err) => {
-				return err;
+				// return err;
+				res.send(err);
 			});
 
 		// Send email to admin
