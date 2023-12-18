@@ -33,6 +33,10 @@ mongoose
 	)
 	.catch((err) => console.log(`An error occured${err}`));
 
+app.get("/", (req, res) => {
+	res.send("Hey! I am live not");
+});
+
 app.post("/contact", async (req, res) => {
 	try {
 		const { name, email, message } = req.body;
