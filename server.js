@@ -31,10 +31,10 @@ mongoose
 	.then((conn) =>
 		console.log(`Mongo DB connected with ${conn.connection.host}`)
 	)
-	.catch((err) => console.log(`An error occured${err}`));
+	.catch((err) => console.log(`An error occured: ${err}`));
 
 app.get("/", (req, res) => {
-	res.send("Hey! I am live not");
+	res.send("Hey! I am live now!");
 });
 
 app.post("/contact", async (req, res) => {
